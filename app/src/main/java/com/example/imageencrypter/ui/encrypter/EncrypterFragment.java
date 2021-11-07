@@ -26,7 +26,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.imageencrypter.Encrypter;
 import com.example.imageencrypter.R;
-import com.example.imageencrypter.databinding.FragmentHomeBinding;
+import com.example.imageencrypter.databinding.FragmentEncrypterBinding;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -90,11 +90,11 @@ public class EncrypterFragment extends Fragment {
     FirebaseFirestore fireStore = FirebaseFirestore.getInstance();
 
     Context applicationContext = null;
-    private FragmentHomeBinding binding;
+    private FragmentEncrypterBinding binding;
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         applicationContext = getActivity().getApplicationContext();
-        binding = FragmentHomeBinding.inflate(inflater, container, false);
+        binding = FragmentEncrypterBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
         mydir = new File(Environment.getExternalStorageDirectory()+"/ImageEncrypter");

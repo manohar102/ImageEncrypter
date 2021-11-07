@@ -12,19 +12,19 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.imageencrypter.databinding.FragmentNotificationsBinding;
+import com.example.imageencrypter.databinding.FragmentAccountBinding;
 
 public class AccountFragment extends Fragment {
 
     private AccountViewModel accountViewModel;
-    private FragmentNotificationsBinding binding;
+    private FragmentAccountBinding binding;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         accountViewModel =
                 new ViewModelProvider(this).get(AccountViewModel.class);
 
-        binding = FragmentNotificationsBinding.inflate(inflater, container, false);
+        binding = FragmentAccountBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
         final TextView textView = binding.textNotifications;

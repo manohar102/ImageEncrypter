@@ -23,7 +23,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.imageencrypter.Encrypter;
 import com.example.imageencrypter.R;
-import com.example.imageencrypter.databinding.FragmentDashboardBinding;
+import com.example.imageencrypter.databinding.FragmentDecrypterBinding;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -54,7 +54,7 @@ import javax.crypto.spec.SecretKeySpec;
 public class DecrypterFragment extends Fragment {
 
     private static final String TAG = "ImageEncrypter";
-    private FragmentDashboardBinding binding;
+    private FragmentDecrypterBinding binding;
 
     private final static String ALGO_RANDOM_NUM_GENERATOR = "SHA1PRNG";
     private final static String ALGO_SECRET_KEY_GENERATOR = "AES";
@@ -85,7 +85,7 @@ public class DecrypterFragment extends Fragment {
                              ViewGroup container, Bundle savedInstanceState) {
         applicationContext = getActivity().getApplicationContext();
         mydir = new File(Environment.getExternalStorageDirectory()+"/ImageEncrypter");
-        binding = FragmentDashboardBinding.inflate(inflater, container, false);
+        binding = FragmentDecrypterBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
         listView = root.findViewById(R.id.listView);
         m_androidId = Settings.Secure.getString(applicationContext.getContentResolver(), Settings.Secure.ANDROID_ID);
