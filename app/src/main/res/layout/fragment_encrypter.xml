@@ -6,12 +6,6 @@
     android:layout_height="match_parent"
     android:padding="16dp"
     tools:context=".MainActivity">
-
-    <!--Linear Layout with horizontal orientation
-     and other properties-->
-
-    <!--Image View for showing image choosen from gallery-->
-
     <LinearLayout
         android:id="@+id/layout_button"
         android:layout_width="379dp"
@@ -21,8 +15,6 @@
         android:gravity="center"
         android:orientation="vertical"
         android:weightSum="2">
-
-        <!--Button for choosing image from gallery-->
         <Button
             android:id="@+id/btnChoose"
             android:layout_width="267dp"
@@ -34,18 +26,6 @@
             android:text="Select image"
             android:textColor="#F4F0F0" />
 
-        <!--        &lt;!&ndash;Button for uploading image&ndash;&gt;-->
-        <!--        <Button-->
-        <!--            android:id="@+id/btnUpload"-->
-        <!--            android:layout_width="267dp"-->
-        <!--            android:layout_height="wrap_content"-->
-        <!--            android:layout_marginTop="4dp"-->
-        <!--            android:layout_marginBottom="4dp"-->
-        <!--            android:layout_weight="1"-->
-        <!--            android:background="#D73F51B5"-->
-        <!--            android:text="Upload"-->
-        <!--            android:textColor="#F4F0F0" />-->
-
         <Button
             android:id="@+id/encPicture"
             android:layout_width="267dp"
@@ -55,18 +35,7 @@
             android:layout_weight="1"
             android:background="#D73F51B5"
             android:text="Encrypt"
-            android:textColor="#F4F0F0"></Button>
-
-        <Button
-            android:id="@+id/decPicture"
-            android:layout_width="267dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:layout_marginBottom="4dp"
-            android:layout_weight="1"
-            android:background="#D73F51B5"
-            android:text="Decrypt"
-            android:textColor="#F4F0F0"></Button>
+            android:textColor="#F4F0F0"/>
     </LinearLayout>
 
     <ImageView

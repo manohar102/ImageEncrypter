@@ -24,6 +24,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 
+import com.example.imageencrypter.Conts;
 import com.example.imageencrypter.Encrypter;
 import com.example.imageencrypter.R;
 import com.example.imageencrypter.databinding.FragmentEncrypterBinding;
@@ -63,95 +64,85 @@ import static android.app.Activity.RESULT_OK;
 public class EncrypterFragment extends Fragment {
 
     private static final String TAG = "ImageEncrypter";
-    private Button btnSelect,btnencrypt,btndecrypt;
+    /** Components **/
+    private Button btnSelect,btnencrypt;
     private ImageView imageView;
 
-    private final static String ALGO_RANDOM_NUM_GENERATOR = "SHA1PRNG";
-    private final static String ALGO_SECRET_KEY_GENERATOR = "AES";
-    private final static int IV_LENGTH = 16;
-    private final static String USERS = "users";
-    private final static String ANDROID_ID = "ANDROID_ID";
-    private final static String PUBLIC_KEY = "PUBLIC_KEY";
-    private final static String IV = "IV";
-    private final static String ENCRPTED_FILE = "/enc_image.swf";
-
-    private File mydir;
-    private Uri filePath;
-    private final int PICK_IMAGE_REQUEST = 22;
-
-    /* Unique Details We Store */
+    /** Unique Details We Store **/
     private String m_androidId = null;
     private SecretKey publicKey = null;
     private byte[] iv = null;
-    /* ----------------------- */
 
-    FirebaseStorage storage = FirebaseStorage.getInstance();
-    StorageReference storageRef = storage.getReference();
-    FirebaseFirestore fireStore = FirebaseFirestore.getInstance();
-
-    Context applicationContext = null;
+    /** Global Variables **/
+    private File mydir;
+    private Uri filePath;
+    private final int PICK_IMAGE_REQUEST = 22;
     private FragmentEncrypterBinding binding;
+    Context applicationContext = null;
+
+    /** fire store **/
+    private FirebaseStorage storage = FirebaseStorage.getInstance();
+    private StorageReference storageRef = storage.getReference();
+    private FirebaseFirestore fireStore = FirebaseFirestore.getInstance();
+
+
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         applicationContext = getActivity().getApplicationContext();
-        binding = FragmentEncrypterBinding.inflate(inflater, container, false);
-        View root = binding.getRoot();
+        this.binding = FragmentEncrypterBinding.inflate(inflater, container, false);
+        View root = this.binding.getRoot();
 
-        mydir = new File(Environment.getExternalStorageDirectory()+"/ImageEncrypter");
-        if(!mydir.exists()) {
-            if(mydir.mkdirs()) {
-                Toast.makeText(getActivity(),"Directory created" + this.mydir,
-                        Toast.LENGTH_LONG).show();
+        this.mydir = new File(Environment.getExternalStorageDirectory()+"/ImageEncrypter");
+        if(!this.mydir.exists()) {
+            if(this.mydir.mkdirs()) {
+                Toast.makeText(applicationContext,"Directory created" + this.mydir, Toast.LENGTH_LONG).show();
             }
             else {
-                Toast.makeText(getActivity(),"Failed to create Directory", Toast.LENGTH_LONG).show();
+                Toast.makeText(applicationContext,"Failed to create Directory", Toast.LENGTH_LONG).show();
             }
         }
-        m_androidId = Settings.Secure.getString(applicationContext.getContentResolver(), Settings.Secure.ANDROID_ID);
-        if(m_androidId!=null){
-            fireStore.collection(USERS).document(m_androidId).get()
+        /** Getting the andorid UNIQUE ID **/
+        this.m_androidId = Settings.Secure.getString(applicationContext.getContentResolver(), Settings.Secure.ANDROID_ID);
+
+        if(this.m_androidId!=null){
+            fireStore.collection(Conts.USERS).document(m_androidId).get()
                     .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                         @RequiresApi(api = Build.VERSION_CODES.O)
                         @Override
                         public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                            Toast.makeText(getActivity(), "Document Fetch completed", Toast.LENGTH_SHORT).show();
                             if (task.isSuccessful()) {
                                 DocumentSnapshot document = task.getResult();
                                 if(document.exists()){
-                                    Toast.makeText(getActivity(), "Document Found", Toast.LENGTH_SHORT).show();
                                     Map<String, Object> data = document.getData();
-                                    byte[] decodedKey = Base64.getDecoder().decode((String) data.get(PUBLIC_KEY));
+                                    byte[] decodedKey = Base64.getDecoder().decode((String) data.get(Conts.PUBLIC_KEY));
                                     publicKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
-                                    m_androidId = data.get(ANDROID_ID).toString();
-                                    Blob blob = (Blob) data.get(IV);
+                                    m_androidId = data.get(Conts.ANDROID_ID).toString();
+                                    Blob blob = (Blob) data.get(Conts.IV);
                                     iv = blob.toBytes();
                                 }
                                 else{
-                                    Toast.makeText(getActivity(), "Document Not Found", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(applicationContext, "Account Not Found", Toast.LENGTH_SHORT).show();
                                     generateKeys();
                                 }
                             } else {
-                                Toast.makeText(getActivity(), "Error getting documents", Toast.LENGTH_LONG).show();
+                                Toast.makeText(applicationContext, "Error getting documents", Toast.LENGTH_LONG).show();
                                 Log.d(TAG, "Error getting documents: ", task.getException());
                             }
                         }
                     }).addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
-                    Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(applicationContext, e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             });
 
         }
-        btnSelect = root.findViewById(R.id.btnChoose);
-        imageView = root.findViewById(R.id.imgView);
-        btnencrypt = root.findViewById(R.id.encPicture);
-        btndecrypt= root.findViewById(R.id.decPicture);
-        // get the Firebase storage reference
-        //storage = FirebaseStorage.getInstance();
-        //storageReference = storage.getReference();
 
-        btnSelect.setOnClickListener(new View.OnClickListener() {
+        this.btnSelect = root.findViewById(R.id.btnChoose);
+        this.imageView = root.findViewById(R.id.imgView);
+        this.btnencrypt = root.findViewById(R.id.encPicture);
+
+        this.btnSelect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v)
             {
@@ -159,63 +150,47 @@ public class EncrypterFragment extends Fragment {
             }
         });
 
-        btnencrypt.setOnClickListener(new View.OnClickListener() {
+        this.btnencrypt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v)
             {
                 encryptImage();
             }
         });
-
-//        btndecrypt.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v)
-//            {
-//                decryptImage();
-//            }
-//        });
         return root;
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        binding = null;
+        this.binding = null;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void generateKeys(){
         Toast.makeText(getActivity(), "Key Generation Initialized", Toast.LENGTH_LONG).show();
-        /* Keys Generation */
+        /** Keys Generation **/
         try {
-            publicKey = KeyGenerator.getInstance(ALGO_SECRET_KEY_GENERATOR).generateKey();
-            iv = new byte[IV_LENGTH];
-            SecureRandom.getInstance(ALGO_RANDOM_NUM_GENERATOR).nextBytes(iv);
+            this.publicKey = KeyGenerator.getInstance(Conts.ALGO_SECRET_KEY_GENERATOR).generateKey();
+            this.iv = new byte[Conts.IV_LENGTH];
+            SecureRandom.getInstance(Conts.ALGO_RANDOM_NUM_GENERATOR).nextBytes(iv);
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
-        /* Keys Generation Completed */
+        /** Keys Generation Completed **/
+        /** Storing to FireStore **/
         Blob blob = Blob.fromBytes(iv);
         Map<String, Object> metaData = new HashMap<>();
-//        List<Object> key = new ArrayList<>();
-//        key.add(publicKey);
-//        key.add(m_androidId);
-        Log.i("Public Key", publicKey.toString());
-        metaData.put(PUBLIC_KEY, Base64.getEncoder().encodeToString(publicKey.getEncoded()));
-        metaData.put(ANDROID_ID, m_androidId);
-        metaData.put(IV, blob);
-        DocumentReference documentReference = fireStore.collection(USERS).document(m_androidId);
+        metaData.put(Conts.PUBLIC_KEY, Base64.getEncoder().encodeToString(this.publicKey.getEncoded()));
+        metaData.put(Conts.ANDROID_ID, this.m_androidId);
+        metaData.put(Conts.IV, blob);
+        DocumentReference documentReference = fireStore.collection(Conts.USERS).document(this.m_androidId);
         documentReference.set(metaData).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void unused) {
-                Toast.makeText(getActivity(), "Device registered", Toast.LENGTH_LONG).show();
+                Toast.makeText(applicationContext, "Device registered", Toast.LENGTH_LONG).show();
             }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
-            }
-        });
+        }).addOnFailureListener(e -> Toast.makeText(applicationContext, e.getMessage(), Toast.LENGTH_LONG).show());
     }
     private void SelectImage() {
         Intent intent = new Intent();
@@ -230,12 +205,12 @@ public class EncrypterFragment extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK
                 && data != null && data.getData() != null) {
-            filePath = data.getData();
+            this.filePath = data.getData();
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(
                         applicationContext.getContentResolver(),
-                        filePath);
-                imageView.setImageBitmap(bitmap);
+                        this.filePath);
+                this.imageView.setImageBitmap(bitmap);
             }
             catch (IOException e) {
                 e.printStackTrace();
@@ -245,29 +220,23 @@ public class EncrypterFragment extends Fragment {
 
     private void encryptImage()
     {
-        if (filePath != null) {
+        if (this.filePath != null) {
             final ProgressDialog progressDialog = new ProgressDialog(getActivity());
             progressDialog.setTitle("Encrypting...");
             progressDialog.show();
-            //prgDialog.setMessage("Uploading...");
-//            File inFile = new File(filePath.toString());
 
-            File outFile = new File(mydir+ENCRPTED_FILE);
+            File outFile = new File(this.mydir+Conts.ENCRPTED_FILE);
             Toast.makeText(getActivity(), "Initiated Encryption", Toast.LENGTH_SHORT).show();
             try {
-                byte[] keyData = this.publicKey.getEncoded();
-                SecretKey key2 = new SecretKeySpec(keyData, 0, keyData.length, ALGO_SECRET_KEY_GENERATOR);
-//                byte[] iv = new byte[IV_LENGTH];
-//                SecureRandom.getInstance(ALGO_RANDOM_NUM_GENERATOR).nextBytes(iv);
-                AlgorithmParameterSpec paramSpec = new IvParameterSpec(iv);
-                InputStream inputStream = applicationContext.getContentResolver().openInputStream(filePath);
+                AlgorithmParameterSpec paramSpec = new IvParameterSpec(this.iv);
+                InputStream inputStream = applicationContext.getContentResolver().openInputStream(this.filePath);
                 Encrypter.encrypt(this.publicKey, paramSpec, inputStream, new FileOutputStream(outFile));
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-            String fileName = getFileName(filePath);
-            String realPath = getRealPathFromURI(filePath);
+            String fileName = getFileName(this.filePath);
+            String realPath = getRealPathFromURI(this.filePath);
             Map<String, Object> details = new HashMap<>();
             if(realPath!=null){
                 File selectedFile = new File(realPath);
@@ -277,21 +246,19 @@ public class EncrypterFragment extends Fragment {
                 details.put("LAST_MODIFIED", date+time);
             }
             String generatedUUID = UUID.randomUUID().toString();
-            details.put("NAME", fileName);
-            details.put("ENCRYPTION_DATE", new Date());
-            details.put("UUID",generatedUUID);
-
-            DocumentReference documentReference = fireStore.document(USERS+"/"+this.m_androidId).collection("Images").document(fileName);
+            details.put(Conts.NAME, fileName);
+            details.put(Conts.ENCRYPTION_DATE, new Date());
+            details.put(Conts.UUID,generatedUUID);
+            DocumentReference documentReference = fireStore.document(Conts.USERS+"/"+this.m_androidId+"/"+Conts.IMAGES+"/"+fileName);
             documentReference.set(details).addOnSuccessListener(new OnSuccessListener<Void>() {
                 @Override
                 public void onSuccess(Void unused) {
-                    StorageReference ref = storageRef.child("images/" + generatedUUID);
-                    // Progress Listener for loading
+                    StorageReference ref = storageRef.child(Conts.STORAGE+"/" + generatedUUID);
                     ref.putFile(Uri.fromFile(outFile)).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            // prgDialog.setMessage("dismiss...");
                             progressDialog.dismiss();
+                            outFile.delete();
                             imageView.setImageBitmap(null);
                             Toast.makeText(getActivity(), "Image Encrypted!!", Toast.LENGTH_SHORT).show();
                         }
