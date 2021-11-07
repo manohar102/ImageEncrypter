@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">ImageEncrypter</string>
+    <string name="title_activity_main2">ImageEncrypter</string>
+    <string name="title_encrypt">Encrypt</string>
+    <string name="title_decrypt">Decrypt</string>
+    <string name="title_account">Account</string>
+</resources>

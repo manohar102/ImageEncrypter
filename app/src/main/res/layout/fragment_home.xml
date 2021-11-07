@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    tools:context=".MainActivity">
+
+    <!--Linear Layout with horizontal orientation
+     and other properties-->
+
+    <!--Image View for showing image choosen from gallery-->
+
+    <LinearLayout
+        android:id="@+id/layout_button"
+        android:layout_width="379dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="-5dp"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:weightSum="2">
+
+        <!--Button for choosing image from gallery-->
+        <Button
+            android:id="@+id/btnChoose"
+            android:layout_width="267dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="4dp"
+            android:layout_weight="1"
+            android:background="#D73F51B5"
+            android:text="Select image"
+            android:textColor="#F4F0F0" />
+
+        <!--        &lt;!&ndash;Button for uploading image&ndash;&gt;-->
+        <!--        <Button-->
+        <!--            android:id="@+id/btnUpload"-->
+        <!--            android:layout_width="267dp"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_marginTop="4dp"-->
+        <!--            android:layout_marginBottom="4dp"-->
+        <!--            android:layout_weight="1"-->
+        <!--            android:background="#D73F51B5"-->
+        <!--            android:text="Upload"-->
+        <!--            android:textColor="#F4F0F0" />-->
+
+        <Button
+            android:id="@+id/encPicture"
+            android:layout_width="267dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="4dp"
+            android:layout_weight="1"
+            android:background="#D73F51B5"
+            android:text="Encrypt"
+            android:textColor="#F4F0F0"></Button>
+
+        <Button
+            android:id="@+id/decPicture"
+            android:layout_width="267dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="4dp"
+            android:layout_weight="1"
+            android:background="#D73F51B5"
+            android:text="Decrypt"
+            android:textColor="#F4F0F0"></Button>
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/imgView"
+        android:layout_width="330dp"
+        android:layout_height="498dp"
+        android:layout_below="@+id/layout_button"
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="23dp"
+        android:layout_marginBottom="-9dp" />
+
+</RelativeLayout>
