@@ -13,6 +13,7 @@ public class Conts {
     public final static String NAME = "NAME";
     public final static String ENCRYPTION_DATE = "ENCRYPTION_DATE";
     public final static String UUID = "UUID";
+    public final static String PIN = "PIN";
     /** Collections **/
     public final static String USERS = "users";
     public final static String IMAGES = "Images";

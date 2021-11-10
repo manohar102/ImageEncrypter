@@ -1,10 +1,14 @@
 package com.example.imageencrypter.ui.decrypter;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,6 +25,7 @@ import androidx.fragment.app.Fragment;
 import com.example.imageencrypter.Conts;
 import com.example.imageencrypter.Encrypter;
 import com.example.imageencrypter.ImageFragment;
+import com.example.imageencrypter.PinFragment;
 import com.example.imageencrypter.R;
 import com.example.imageencrypter.databinding.FragmentDecrypterBinding;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -50,8 +55,11 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import static android.app.Activity.RESULT_OK;
+
 public class DecrypterFragment extends Fragment {
 
+    private static final int PIN_FRAGMENT = 888;
     private static final String TAG = "ImageDecrypter";
 
     /** Components **/
@@ -61,6 +69,7 @@ public class DecrypterFragment extends Fragment {
     private String m_androidId = null;
     private SecretKey publicKey = null;
     private byte[] iv = null;
+    private int userPin;
 
     /** Global Variables **/
     private File mydir;
@@ -68,11 +77,13 @@ public class DecrypterFragment extends Fragment {
     private List<String> imageArray = new ArrayList<>();
     private ArrayList<Map<String, Object>> imageData = new ArrayList<>();
     private FragmentDecrypterBinding binding;
+    private int selectedImage;
 
     /** fire store **/
     private FirebaseStorage storage = FirebaseStorage.getInstance();
     private StorageReference storageRef = storage.getReference();
     private FirebaseFirestore fireStore = FirebaseFirestore.getInstance();
+
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -96,6 +107,7 @@ public class DecrypterFragment extends Fragment {
                                     byte[] decodedKey = Base64.getDecoder().decode((String) data.get(Conts.PUBLIC_KEY));
                                     publicKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
                                     m_androidId = data.get(Conts.ANDROID_ID).toString();
+                                    userPin = ((Number)data.get(Conts.PIN)).intValue();
                                     Blob blob = (Blob) data.get(Conts.IV);
                                     iv = blob.toBytes();
                                 }
@@ -135,7 +147,7 @@ public class DecrypterFragment extends Fragment {
                         }
                     }).addOnFailureListener(e -> Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show());
         }
-        listView.setOnItemClickListener((listView, itemView, itemPosition, itemId) -> decryptImage(this.imageData.get(itemPosition)));
+        listView.setOnItemClickListener((listView, itemView, itemPosition, itemId) -> {this.selectedImage = itemPosition; this.openPinFragment();});
         return root;
     }
 
@@ -143,6 +155,12 @@ public class DecrypterFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         this.binding = null;
+    }
+
+    public void openPinFragment(){
+        PinFragment pinFragment = new PinFragment();
+        pinFragment.setTargetFragment(this, PIN_FRAGMENT);
+        pinFragment.show(getParentFragmentManager(), ImageFragment.TAG);
     }
 
     public void processData(Map<String, Object> data){
@@ -193,5 +211,31 @@ public class DecrypterFragment extends Fragment {
                 Toast.makeText(getActivity(),"Failed " + e.getMessage(),Toast.LENGTH_SHORT).show();
             }
         });
+    }
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PIN_FRAGMENT && resultCode == Activity.RESULT_OK
+                && data != null) {
+            Bundle bundle = data.getExtras();
+            int pin = bundle.getInt("resultPin");
+            if(pin>999){
+                if(this.userPin == pin){
+                    this.decryptImage(this.imageData.get(this.selectedImage));
+                }
+                else{
+                    Toast.makeText(applicationContext, "Incorrect PIN, Please try again..!", Toast.LENGTH_LONG).show();
+                    this.openPinFragment();
+                }
+            }
+            else{
+                Toast.makeText(applicationContext, "Please Setup Valid PIN", Toast.LENGTH_LONG).show();
+                this.openPinFragment();
+            }
+        }
+        else if (resultCode == Activity.RESULT_CANCELED) {
+            System.exit(0);
+        }
     }
 }

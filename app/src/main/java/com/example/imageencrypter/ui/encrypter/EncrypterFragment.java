@@ -1,5 +1,6 @@
 package com.example.imageencrypter.ui.encrypter;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -26,6 +27,8 @@ import androidx.fragment.app.Fragment;
 
 import com.example.imageencrypter.Conts;
 import com.example.imageencrypter.Encrypter;
+import com.example.imageencrypter.ImageFragment;
+import com.example.imageencrypter.PinFragment;
 import com.example.imageencrypter.R;
 import com.example.imageencrypter.databinding.FragmentEncrypterBinding;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -63,6 +66,7 @@ import static android.app.Activity.RESULT_OK;
 
 public class EncrypterFragment extends Fragment {
 
+    private static final int PIN_FRAGMENT = 888;
     private static final String TAG = "ImageEncrypter";
     /** Components **/
     private Button btnSelect,btnencrypt;
@@ -104,39 +108,7 @@ public class EncrypterFragment extends Fragment {
         /** Getting the andorid UNIQUE ID **/
         this.m_androidId = Settings.Secure.getString(applicationContext.getContentResolver(), Settings.Secure.ANDROID_ID);
 
-        if(this.m_androidId!=null){
-            fireStore.collection(Conts.USERS).document(m_androidId).get()
-                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                        @RequiresApi(api = Build.VERSION_CODES.O)
-                        @Override
-                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                            if (task.isSuccessful()) {
-                                DocumentSnapshot document = task.getResult();
-                                if(document.exists()){
-                                    Map<String, Object> data = document.getData();
-                                    byte[] decodedKey = Base64.getDecoder().decode((String) data.get(Conts.PUBLIC_KEY));
-                                    publicKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
-                                    m_androidId = data.get(Conts.ANDROID_ID).toString();
-                                    Blob blob = (Blob) data.get(Conts.IV);
-                                    iv = blob.toBytes();
-                                }
-                                else{
-                                    Toast.makeText(applicationContext, "Account Not Found", Toast.LENGTH_SHORT).show();
-                                    generateKeys();
-                                }
-                            } else {
-                                Toast.makeText(applicationContext, "Error getting documents", Toast.LENGTH_LONG).show();
-                                Log.d(TAG, "Error getting documents: ", task.getException());
-                            }
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    Toast.makeText(applicationContext, e.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
-
-        }
+        this.verifyRegistration();
 
         this.btnSelect = root.findViewById(R.id.btnChoose);
         this.imageView = root.findViewById(R.id.imgView);
@@ -166,8 +138,47 @@ public class EncrypterFragment extends Fragment {
         this.binding = null;
     }
 
+    private void verifyRegistration(){
+        if(this.m_androidId!=null){
+            fireStore.collection(Conts.USERS).document(m_androidId).get()
+                    .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                        @RequiresApi(api = Build.VERSION_CODES.O)
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            if (task.isSuccessful()) {
+                                DocumentSnapshot document = task.getResult();
+                                if(document.exists()){
+                                    Map<String, Object> data = document.getData();
+                                    byte[] decodedKey = Base64.getDecoder().decode((String) data.get(Conts.PUBLIC_KEY));
+                                    publicKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+                                    m_androidId = data.get(Conts.ANDROID_ID).toString();
+                                    Blob blob = (Blob) data.get(Conts.IV);
+                                    iv = blob.toBytes();
+                                }
+                                else{
+                                    Toast.makeText(applicationContext, "Account Not Found", Toast.LENGTH_SHORT).show();
+                                    askPinSetup();
+                                }
+                            } else {
+                                Toast.makeText(applicationContext, "Error getting documents", Toast.LENGTH_LONG).show();
+                                Log.d(TAG, "Error getting documents: ", task.getException());
+                            }
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Toast.makeText(applicationContext, e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+    }
+    private void askPinSetup(){
+        PinFragment pinFragment = new PinFragment();
+        pinFragment.setTargetFragment(this, PIN_FRAGMENT);
+        pinFragment.show(getParentFragmentManager(), ImageFragment.TAG);
+    }
     @RequiresApi(api = Build.VERSION_CODES.O)
-    private void generateKeys(){
+    private void generateKeys(int pin){
         Toast.makeText(getActivity(), "Key Generation Initialized", Toast.LENGTH_LONG).show();
         /** Keys Generation **/
         try {
@@ -184,6 +195,7 @@ public class EncrypterFragment extends Fragment {
         metaData.put(Conts.PUBLIC_KEY, Base64.getEncoder().encodeToString(this.publicKey.getEncoded()));
         metaData.put(Conts.ANDROID_ID, this.m_androidId);
         metaData.put(Conts.IV, blob);
+        metaData.put(Conts.PIN, pin);
         DocumentReference documentReference = fireStore.collection(Conts.USERS).document(this.m_androidId);
         documentReference.set(metaData).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
@@ -200,6 +212,7 @@ public class EncrypterFragment extends Fragment {
                 PICK_IMAGE_REQUEST);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -215,6 +228,21 @@ public class EncrypterFragment extends Fragment {
             catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+        else if (requestCode == PIN_FRAGMENT && resultCode == Activity.RESULT_OK
+                && data != null) {
+            Bundle bundle = data.getExtras();
+            int pin = bundle.getInt("resultPin");
+            if(pin>999){
+                this.generateKeys(pin);
+            }
+            else{
+                Toast.makeText(applicationContext, "PIN Not Valid, Please Enter Valid PIN", Toast.LENGTH_LONG).show();
+                this.askPinSetup();
+            }
+        }
+        else if (resultCode == Activity.RESULT_CANCELED) {
+            System.exit(0);
         }
     }
 
