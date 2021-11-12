@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import androidx.fragment.app.DialogFragment;
 
@@ -26,7 +27,7 @@ public class PinFragment extends DialogFragment {
     private String androidId;
     Context applicationContext;
     private FirebaseFirestore fireStore = FirebaseFirestore.getInstance();
-
+    private TextView title;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -40,6 +41,10 @@ public class PinFragment extends DialogFragment {
         np2 = root.findViewById(R.id.digit2);
         np3 = root.findViewById(R.id.digit3);
         np4 = root.findViewById(R.id.digit4);
+        title = root.findViewById(R.id.pinTitle);
+        boolean isRegisteration = getArguments().getBoolean("isRegisteration");
+        if(isRegisteration)
+            title.setText("PIN Setup");
         this.button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

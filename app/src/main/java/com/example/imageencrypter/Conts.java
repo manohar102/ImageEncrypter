@@ -6,7 +6,7 @@ public class Conts {
     public final static int IV_LENGTH = 16;
 
     public final static String ANDROID_ID = "ANDROID_ID";
-    public final static String PUBLIC_KEY = "PUBLIC_KEY";
+    public final static String PUBLIC_KEY = "SECRET_KEY";
     public final static String IV = "IV";
     public final static String ENCRPTED_FILE = "/enc_image.swf";
     public final static String DECRYPTED_FILE = "/image.png";

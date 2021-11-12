@@ -158,7 +158,10 @@ public class DecrypterFragment extends Fragment {
     }
 
     public void openPinFragment(){
+        Bundle args = new Bundle();
+        args.putBoolean("isRegisteration", false);
         PinFragment pinFragment = new PinFragment();
+        pinFragment.setArguments(args);
         pinFragment.setTargetFragment(this, PIN_FRAGMENT);
         pinFragment.show(getParentFragmentManager(), ImageFragment.TAG);
     }

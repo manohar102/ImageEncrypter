@@ -1,9 +1,14 @@
 package com.example.imageencrypter.ui.encrypter;
 
+import static android.app.Activity.RESULT_OK;
+
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -51,9 +56,11 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -62,12 +69,11 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import static android.app.Activity.RESULT_OK;
-
 public class EncrypterFragment extends Fragment {
 
     private static final int PIN_FRAGMENT = 888;
     private static final String TAG = "ImageEncrypter";
+    private static final int REQUEST_PERM_DELETE = 899;
     /** Components **/
     private Button btnSelect,btnencrypt;
     private ImageView imageView;
@@ -173,7 +179,10 @@ public class EncrypterFragment extends Fragment {
         }
     }
     private void askPinSetup(){
+        Bundle args = new Bundle();
+        args.putBoolean("isRegisteration", true);
         PinFragment pinFragment = new PinFragment();
+        pinFragment.setArguments(args);
         pinFragment.setTargetFragment(this, PIN_FRAGMENT);
         pinFragment.show(getParentFragmentManager(), ImageFragment.TAG);
     }
@@ -286,6 +295,16 @@ public class EncrypterFragment extends Fragment {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                             progressDialog.dismiss();
+                            if (filePath != null) {
+                                final ContentResolver resolver = applicationContext.getContentResolver();
+                                String[] selectionArgsPdf = new String[]{fileName};
+                                final Uri filesUri = MediaStore.Files.getContentUri("external");
+                                try {
+                                    resolver.delete(filesUri, MediaStore.Files.FileColumns.DISPLAY_NAME + "=?", selectionArgsPdf);
+                                } catch (Exception ex) {
+                                    ex.printStackTrace();
+                                }
+                            }
                             outFile.delete();
                             imageView.setImageBitmap(null);
                             Toast.makeText(getActivity(), "Image Encrypted!!", Toast.LENGTH_SHORT).show();
