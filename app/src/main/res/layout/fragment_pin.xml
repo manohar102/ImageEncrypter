@@ -23,9 +23,50 @@
             android:text="ENTER PIN" />
 
         <LinearLayout
+            android:id="@+id/mobielVerification"
+            android:layout_width="389dp"
+            android:layout_height="194dp"
+            android:layout_marginTop="60dp"
+            android:orientation="vertical"
+            android:visibility="invisible">
+
+            <EditText
+                android:id="@+id/mobileNumber"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="30dp"
+                android:layout_marginRight="30dp"
+                android:layout_marginTop="20dp"
+                android:ems="10"
+                android:inputType="phone"
+                />
+
+            <EditText
+                android:id="@+id/oneTimePassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="30dp"
+                android:layout_marginRight="30dp"
+                android:layout_marginTop="20dp"
+                android:ems="10"
+                android:inputType="numberPassword"
+                android:visibility="invisible" />
+
+            <Button
+                android:id="@+id/verifyButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:layout_marginStart="30dp"
+                android:text="Verify" />
+
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/codeLayout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="60dp"
             android:orientation="horizontal">
 
             <EditText
@@ -85,7 +126,8 @@
             android:enabled="false"
             android:text="Proceed"
             android:textAllCaps="false"
-            android:textColor="#F4F0F0" />
+            android:textColor="#F4F0F0"
+            />
     </LinearLayout>
 
 </FrameLayout>

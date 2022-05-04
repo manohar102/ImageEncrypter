@@ -23,7 +23,7 @@
             android:layout_marginBottom="4dp"
             android:layout_weight="1"
             android:background="#D73F51B5"
-            android:text="Select image"
+            android:text="Select File"
             android:textColor="#F4F0F0" />
 
         <Button

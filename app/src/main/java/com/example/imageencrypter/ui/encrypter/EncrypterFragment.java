@@ -187,7 +187,7 @@ public class EncrypterFragment extends Fragment {
         pinFragment.show(getParentFragmentManager(), ImageFragment.TAG);
     }
     @RequiresApi(api = Build.VERSION_CODES.O)
-    private void generateKeys(int pin){
+    private void generateKeys(int pin, String mobileNumber){
         Toast.makeText(getActivity(), "Key Generation Initialized", Toast.LENGTH_LONG).show();
         /** Keys Generation **/
         try {
@@ -205,6 +205,7 @@ public class EncrypterFragment extends Fragment {
         metaData.put(Conts.ANDROID_ID, this.m_androidId);
         metaData.put(Conts.IV, blob);
         metaData.put(Conts.PIN, pin);
+        metaData.put(Conts.MOBILE_NUMBER, mobileNumber);
         DocumentReference documentReference = fireStore.collection(Conts.USERS).document(this.m_androidId);
         documentReference.set(metaData).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
@@ -215,7 +216,7 @@ public class EncrypterFragment extends Fragment {
     }
     private void SelectImage() {
         Intent intent = new Intent();
-        intent.setType("image/*");
+        intent.setType("*/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
         startActivityForResult(Intent.createChooser(intent, "Select Image from here..."),
                 PICK_IMAGE_REQUEST);
@@ -242,8 +243,9 @@ public class EncrypterFragment extends Fragment {
                 && data != null) {
             Bundle bundle = data.getExtras();
             int pin = bundle.getInt("resultPin");
+            String mobileNumber = bundle.getString("mobileNumber");
             if(pin>999){
-                this.generateKeys(pin);
+                this.generateKeys(pin, mobileNumber);
             }
             else{
                 Toast.makeText(applicationContext, "PIN Not Valid, Please Enter Valid PIN", Toast.LENGTH_LONG).show();
@@ -273,6 +275,11 @@ public class EncrypterFragment extends Fragment {
             }
 
             String fileName = getFileName(this.filePath);
+            int index = fileName.lastIndexOf('.');
+            String extension = null;
+            if(index > 0) {
+                extension = fileName.substring(index + 1);
+            }
             String realPath = getRealPathFromURI(this.filePath);
             Map<String, Object> details = new HashMap<>();
             if(realPath!=null){
@@ -285,6 +292,7 @@ public class EncrypterFragment extends Fragment {
             String generatedUUID = UUID.randomUUID().toString();
             details.put(Conts.NAME, fileName);
             details.put(Conts.ENCRYPTION_DATE, new Date());
+            details.put(Conts.EXTENTION, extension);
             details.put(Conts.UUID,generatedUUID);
             DocumentReference documentReference = fireStore.document(Conts.USERS+"/"+this.m_androidId+"/"+Conts.IMAGES+"/"+fileName);
             documentReference.set(details).addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -300,7 +308,7 @@ public class EncrypterFragment extends Fragment {
                                 String[] selectionArgsPdf = new String[]{fileName};
                                 final Uri filesUri = MediaStore.Files.getContentUri("external");
                                 try {
-                                    resolver.delete(filesUri, MediaStore.Files.FileColumns.DISPLAY_NAME + "=?", selectionArgsPdf);
+//                                    resolver.delete(filesUri, MediaStore.Files.FileColumns.DISPLAY_NAME + "=?", selectionArgsPdf);
                                 } catch (Exception ex) {
                                     ex.printStackTrace();
                                 }

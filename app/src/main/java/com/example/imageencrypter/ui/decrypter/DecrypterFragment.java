@@ -192,14 +192,14 @@ public class DecrypterFragment extends Fragment {
                     e.printStackTrace();
                 }
                 try {
-                    File outFile_dec = new File(mydir+Conts.DECRYPTED_FILE);
+                    File outFile_dec = new File(mydir+"/"+imageData.get(Conts.NAME));
                     byte[] keyData = publicKey.getEncoded();
                     SecretKey key2 = new SecretKeySpec(keyData, 0, keyData.length, Conts.ALGO_SECRET_KEY_GENERATOR);
                     AlgorithmParameterSpec paramSpec = new IvParameterSpec(iv);
                     Encrypter.decrypt(key2, paramSpec, new FileInputStream(outFile), new FileOutputStream(outFile_dec));
                     progDialog.dismiss();
                     outFile.delete();
-                    new ImageFragment().show(getChildFragmentManager(), ImageFragment.TAG);
+//                    new ImageFragment().show(getChildFragmentManager(), ImageFragment.TAG);
                     Toast.makeText(applicationContext, "Image Decrypted!!", Toast.LENGTH_SHORT).show();
                 } catch (Exception e) {
                     e.printStackTrace();
